@@ -17,12 +17,14 @@ class SensorDataPage extends StatelessWidget {
       body: PageView(
         controller: _pageController,
         children: [
+          // 첫 번째 페이지 - 온도와 습도 그래프
           Column(
             children: [
               Expanded(child: _buildLineChartSection('온도', [100, 200, 150, 300, 250, 200])),
               Expanded(child: _buildLineChartSection('습도', [50, 100, 75, 150, 125, 100])),
             ],
           ),
+          // 두 번째 페이지 - 소음 정도와 공기질 그래프
           Row(
             children: [
               Expanded(child: _buildGaugeChartSection('소음 정도', 40, 'dB')),
@@ -106,35 +108,39 @@ class SensorDataPage extends StatelessWidget {
     );
   }
 
-  // 게이지 차트 섹션 생성
+  // 게이지 차트 섹션 생성 - 소음 정도와 공기질 카드의 높이를 살짝 더 늘림
   Widget _buildGaugeChartSection(String title, double value, String unit) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              CustomPaint(
-                size: Size(150, 150),
-                painter: GaugeChartPainter(value),
-              ),
-              SizedBox(height: 16),
-              Text(
-                '$value $unit',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pink[200]),
-              ),
-            ],
+      child: SizedBox(
+        height: 255, // 카드 높이를 255로 설정하여 여백을 10픽셀 더 늘림
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // 높이를 내용에 맞춰 최소화
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                CustomPaint(
+                  size: Size(140, 140), // 게이지 차트 크기를 140x140으로 유지
+                  painter: GaugeChartPainter(value),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  '$value $unit',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.pink[200]),
+                ),
+              ],
+            ),
           ),
         ),
       ),

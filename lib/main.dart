@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:careapp2/SensorDataPage/SensorDataPage.dart'; // SensorDataPage 파일을 임포트합니다.
-import 'package:careapp2/ChatHistoryPage/ChatHistoryPage.dart'; // ChatHistoryPage 파일을 임포트합니다.
+import 'package:careapp2/SensorDataPage/SensorDataPage.dart';
+import 'package:careapp2/ChatHistoryPage/ChatHistoryPage.dart';
+import 'dart:math';
 
 void main() {
-  runApp(CareApp());
+  runApp(CareApp()); // 앱의 시작점 설정
 }
 
 // 앱의 최상위 위젯
@@ -11,12 +12,12 @@ class CareApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CareApp', // 앱 제목 설정
+      title: 'CareApp',
       theme: ThemeData(
         primaryColor: Colors.pink[100], // 주요 색상 설정
         scaffoldBackgroundColor: Colors.white, // 배경색 설정
       ),
-      home: SplashScreen(), // 앱 시작 시 스플래시 화면으로 설정
+      home: SplashScreen(), // 시작 페이지로 스플래시 화면 설정
     );
   }
 }
@@ -27,12 +28,10 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-// 스플래시 화면의 상태 관리
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // 3초 후에 홈 화면으로 자동 전환
     Future.delayed(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
@@ -47,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: Text(
-          'CareApp', // 스플래시 화면의 앱 이름 텍스트
+          'CareApp', // 스플래시 화면의 텍스트
           style: TextStyle(
             fontSize: 48,
             fontWeight: FontWeight.bold,
@@ -66,18 +65,17 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-// 홈 화면 상태 관리
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0; // 현재 선택된 하단 네비게이션 인덱스
+  int _selectedIndex = 0; // 하단 네비게이션 현재 인덱스
 
-  // 네비게이션 아이템 탭 시 호출되는 함수
+  // 네비게이션 아이템 탭 핸들러
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // 인덱스를 업데이트하여 선택된 페이지를 변경합니다.
+      _selectedIndex = index;
     });
   }
 
-  // 선택된 인덱스에 따라 표시할 페이지 반환
+  // 현재 선택된 인덱스에 따른 페이지 반환
   Widget _getSelectedPage() {
     switch (_selectedIndex) {
       case 1:
@@ -93,20 +91,20 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('CareApp', style: TextStyle(color: Colors.pink[200])), // 앱바 제목 설정
+        title: Text('CareApp', style: TextStyle(color: Colors.pink[200])),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: _getSelectedPage(), // 현재 선택된 페이지를 표시
+      body: _getSelectedPage(), // 선택된 페이지 표시
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // 현재 인덱스 설정
-        onTap: _onItemTapped, // 탭 시 호출할 함수
-        selectedItemColor: Colors.pink[200], // 선택된 아이템 색상
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Colors.pink[200],
         unselectedItemColor: Colors.grey,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'), // 홈 아이템
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Sensor Data'), // 센서 데이터 아이템
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'), // 채팅 아이템
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Sensor Data'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
         ],
       ),
     );
@@ -118,24 +116,24 @@ class MainContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0), // 전체 패딩 설정
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 프로필 정보 표시 섹션
           Row(
             children: [
               CircleAvatar(
-                radius: 30, // 프로필 이미지 크기 설정
-                backgroundImage: NetworkImage('https://via.placeholder.com/150'), // 임시 이미지
+                radius: 30,
+                backgroundImage: NetworkImage('https://via.placeholder.com/150'),
               ),
-              SizedBox(width: 10), // 간격 설정
+              SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('어르신1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), // 이름
-                  Text('나이 n세', style: TextStyle(color: Colors.grey)), // 나이 정보
-                  Text('서울 광진구', style: TextStyle(color: Colors.grey)), // 위치 정보
+                  Text('어르신1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text('나이 n세', style: TextStyle(color: Colors.grey)),
+                  Text('서울 광진구', style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ],
@@ -166,17 +164,21 @@ class MainContent extends StatelessWidget {
                   children: [
                     Expanded(child: _buildSensorCard('온도', '23°C')),
                     SizedBox(width: 10),
-                    Expanded(child: _buildSensorCard('소음 정도', '40 dB')),
-                    SizedBox(width: 10),
-                    Expanded(child: _buildSensorCard('공기질', '300 ppm')),
+                    Expanded(child: _buildSensorCard('습도', '55%')),
                   ],
                 ),
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _buildSensorCard('움직임', '활발')),
+                    Expanded(child: _buildGaugeSensorCard('소음 정도', 40, 'dB')),
                     SizedBox(width: 10),
-                    Expanded(child: _buildSensorCard('응급상황 발생 여부', '없음')),
+                    Expanded(child: _buildGaugeSensorCard('공기질', 300, 'ppm')),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(child: _buildSensorCard('움직임 정도', '활발')),
                   ],
                 ),
               ],
@@ -184,7 +186,7 @@ class MainContent extends StatelessWidget {
           ),
           SizedBox(height: 20),
 
-          // 최근 챗봇 이력 섹션
+          // 최근 챗봇 대화 내용 섹션
           Container(
             padding: EdgeInsets.all(16),
             height: MediaQuery.of(context).size.height * 0.25,
@@ -223,7 +225,7 @@ class MainContent extends StatelessWidget {
     );
   }
 
-  // 센서 카드 위젯
+  // 일반 센서 카드 위젯 (온도, 습도 등)
   Widget _buildSensorCard(String title, String data) {
     return Container(
       padding: EdgeInsets.all(16),
@@ -250,7 +252,46 @@ class MainContent extends StatelessWidget {
     );
   }
 
-  // 챗봇 메시지 생성 위젯
+  // 게이지 차트가 포함된 센서 카드 위젯 (소음 정도, 공기질)
+  Widget _buildGaugeSensorCard(String title, double value, String unit) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      height: 160,
+      decoration: BoxDecoration(
+        color: Colors.pink[50],
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+          SizedBox(height: 8),
+          SizedBox(
+            height: 60,
+            width: 60,
+            child: CustomPaint(
+              painter: GaugeChartPainter(value),
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            '$value $unit',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.pink[200]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 채팅 메시지 생성 위젯
   Widget _buildChatMessage(String sender, String message, {required bool isUser}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
@@ -282,5 +323,52 @@ class MainContent extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// 게이지 차트를 그리는 CustomPainter 클래스
+class GaugeChartPainter extends CustomPainter {
+  final double value;
+  GaugeChartPainter(this.value);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double angle = value / 100 * 180;
+
+    // 배경 원호
+    Paint backgroundArc = Paint()
+      ..color = Colors.grey[300]!
+      ..strokeWidth = 10
+      ..style = PaintingStyle.stroke;
+
+    // 값 원호
+    Paint valueArc = Paint()
+      ..color = Colors.pink[200]!
+      ..strokeWidth = 10
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    // 배경 원호 그리기
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
+      pi,
+      pi,
+      false,
+      backgroundArc,
+    );
+
+    // 값에 따른 원호 그리기
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
+      pi,
+      angle * pi / 180,
+      false,
+      valueArc,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
