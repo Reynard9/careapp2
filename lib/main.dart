@@ -4,25 +4,23 @@ import 'package:careapp2/ChatHistoryPage/ChatHistoryPage.dart';
 import 'dart:math';
 
 void main() {
-  runApp(CareApp()); // 앱의 시작점 설정
+  runApp(CareApp());
 }
 
-// 앱의 최상위 위젯
 class CareApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CareApp',
       theme: ThemeData(
-        primaryColor: Colors.pink[100], // 주요 색상 설정
-        scaffoldBackgroundColor: Colors.white, // 배경색 설정
+        primaryColor: Colors.pink[100],
+        scaffoldBackgroundColor: Colors.white,
       ),
-      home: SplashScreen(), // 시작 페이지로 스플래시 화면 설정
+      home: SplashScreen(),
     );
   }
 }
 
-// 스플래시 화면 위젯
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -35,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()), // 홈 페이지로 이동
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     });
   }
@@ -46,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: Text(
-          'CareApp', // 스플래시 화면의 텍스트
+          'CareApp',
           style: TextStyle(
             fontSize: 48,
             fontWeight: FontWeight.bold,
@@ -59,31 +57,28 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// 홈 화면 위젯
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0; // 하단 네비게이션 현재 인덱스
+  int _selectedIndex = 0;
 
-  // 네비게이션 아이템 탭 핸들러
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  // 현재 선택된 인덱스에 따른 페이지 반환
   Widget _getSelectedPage() {
     switch (_selectedIndex) {
       case 1:
-        return SensorDataPage(); // 센서 데이터 페이지
+        return SensorDataPage();
       case 2:
-        return ChatHistoryPage(); // 채팅 히스토리 페이지
+        return ChatHistoryPage();
       default:
-        return MainContent(); // 메인 페이지
+        return MainContent();
     }
   }
 
@@ -91,11 +86,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('CareApp', style: TextStyle(color: Colors.pink[200])),
+        title: Text(
+          'CareApp',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pink[200]),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: false,
       ),
-      body: _getSelectedPage(), // 선택된 페이지 표시
+      body: _getSelectedPage(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -164,7 +163,7 @@ class MainContent extends StatelessWidget {
                   children: [
                     Expanded(child: _buildSensorCard('온도', '23°C')),
                     SizedBox(width: 10),
-                    Expanded(child: _buildSensorCard('습도', '55%')),
+                    Expanded(child: _buildSensorCard('가스 센서', '양호')),
                   ],
                 ),
                 SizedBox(height: 10),
@@ -172,7 +171,7 @@ class MainContent extends StatelessWidget {
                   children: [
                     Expanded(child: _buildGaugeSensorCard('소음 정도', 40, 'dB')),
                     SizedBox(width: 10),
-                    Expanded(child: _buildGaugeSensorCard('공기질', 300, 'ppm')),
+                    Expanded(child: _buildGaugeSensorCard('습도', 55, '%')),
                   ],
                 ),
                 SizedBox(height: 10),
@@ -225,7 +224,7 @@ class MainContent extends StatelessWidget {
     );
   }
 
-  // 일반 센서 카드 위젯 (온도, 습도 등)
+  // 일반 센서 카드 위젯 (온도, 가스 센서 등)
   Widget _buildSensorCard(String title, String data) {
     return Container(
       padding: EdgeInsets.all(16),
@@ -252,7 +251,7 @@ class MainContent extends StatelessWidget {
     );
   }
 
-  // 게이지 차트가 포함된 센서 카드 위젯 (소음 정도, 공기질)
+  // 게이지 차트가 포함된 센서 카드 위젯 (습도, 소음 정도)
   Widget _buildGaugeSensorCard(String title, double value, String unit) {
     return Container(
       padding: EdgeInsets.all(16),

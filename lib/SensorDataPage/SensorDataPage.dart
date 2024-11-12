@@ -10,7 +10,7 @@ class SensorDataPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sensor Data', style: TextStyle(color: Colors.pink[200])),
+        title: Text('센서 데이터 현황', style: TextStyle(color: Colors.pink[200])),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -24,11 +24,11 @@ class SensorDataPage extends StatelessWidget {
               Expanded(child: _buildLineChartSection('습도', [50, 100, 75, 150, 125, 100])),
             ],
           ),
-          // 두 번째 페이지 - 소음 정도와 공기질 그래프
+          // 두 번째 페이지 - 소음 정도와 가스 센서 그래프
           Row(
             children: [
               Expanded(child: _buildGaugeChartSection('소음 정도', 40, 'dB')),
-              Expanded(child: _buildGaugeChartSection('공기질', 300, 'ppm')),
+              Expanded(child: _buildGaugeChartSection('가스 센서', 300, 'ppm')), // '공기질'을 '가스 센서'로 변경
             ],
           ),
         ],
@@ -108,7 +108,7 @@ class SensorDataPage extends StatelessWidget {
     );
   }
 
-  // 게이지 차트 섹션 생성 - 소음 정도와 공기질 카드의 높이를 살짝 더 늘림
+  // 게이지 차트 섹션 생성 - 소음 정도와 가스 센서 카드의 높이를 살짝 더 늘림
   Widget _buildGaugeChartSection(String title, double value, String unit) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
