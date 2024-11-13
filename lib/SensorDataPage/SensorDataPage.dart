@@ -72,21 +72,26 @@ class _SensorDataPageState extends State<SensorDataPage> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: PageView(
-        children: [
-          Column(
-            children: [
-              Expanded(child: _buildLineChartSection('온도', temperatureData, temperature, '°C')),
-              Expanded(child: _buildLineChartSection('습도', humidityData, humidity, '%')),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(child: _buildGaugeChartSection('소음 정도', noiseLevel, 'dB')),
-              Expanded(child: _buildGaugeChartSection('가스 센서', gasSensor, 'ppm')),
-            ],
-          ),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 첫 번째 줄 - 소음 정도와 가스 센서
+            Row(
+              children: [
+                Expanded(child: _buildGaugeChartSection('소음 정도', noiseLevel)),
+                SizedBox(width: 8),
+                Expanded(child: _buildGaugeChartSection('가스 센서', gasSensor)),
+              ],
+            ),
+            SizedBox(height: 16),
+            // 두 번째 줄 - 온도 (세로 배치)
+            _buildLineChartSection('온도', temperatureData, temperature, '°C'),
+            SizedBox(height: 8),
+            // 세 번째 줄 - 습도 (세로 배치)
+            _buildLineChartSection('습도', humidityData, humidity, '%'),
+          ],
+        ),
       ),
     );
   }
@@ -115,7 +120,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
               ),
               SizedBox(height: 16),
               SizedBox(
-                height: 200,
+                height: 100,
                 child: LineChart(
                   LineChartData(
                     lineBarsData: [
@@ -148,7 +153,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
                           getTitlesWidget: (value, meta) {
                             if (value == data.last.toDouble()) {
                               return Padding(
-                                padding: const EdgeInsets.only(right: 5), // 오른쪽으로 5픽셀 이동
+                                padding: const EdgeInsets.only(right: 5),
                                 child: Text(
                                   '$value$unit',
                                   style: TextStyle(color: Colors.pink[200], fontSize: 14),
@@ -181,7 +186,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
     );
   }
 
-  Widget _buildGaugeChartSection(String title, String value, String unit) {
+  Widget _buildGaugeChartSection(String title, String value) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -208,7 +213,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  '$value $unit',
+                  value,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.pink[200]),
                 ),
               ],

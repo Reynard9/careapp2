@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:careapp2/ChatSummaryPage/ChatSummaryPage.dart';
 
 class ChatHistoryPage extends StatefulWidget {
   @override
@@ -8,25 +9,21 @@ class ChatHistoryPage extends StatefulWidget {
 }
 
 class _ChatHistoryPageState extends State<ChatHistoryPage> {
-  List<Map<String, dynamic>> chatList = []; // 채팅 기록 리스트
+  List<Map<String, dynamic>> chatList = [];
 
   @override
   void initState() {
     super.initState();
-    fetchChatHistData(); // 초기 로드 시 데이터 가져오기
+    fetchChatHistData();
   }
 
-  // 채팅 목록 API 호출 함수
   Future<void> fetchChatHistData() async {
-    final url = Uri.parse('http://203.250.148.52:48003/api/chat/list'); // 실제 API URL
+    final url = Uri.parse('http://203.250.148.52:48003/api/chat/list');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final data = json.decode(utf8.decode(response.bodyBytes));
-      print('API Data: $data'); // API 응답 데이터 출력
-
       setState(() {
-        // JSON 데이터를 리스트로 변환하여 상태에 저장
         chatList = List<Map<String, dynamic>>.from(data);
       });
     } else {
@@ -34,7 +31,6 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     }
   }
 
-  // 날짜 포맷팅 함수
   String formatDate(String dateString) {
     try {
       final dateTime = DateTime.parse(dateString);
@@ -54,12 +50,12 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
       ),
       body: Center(
         child: Container(
-          width: 720, // 화면 너비 고정
+          width: 720,
           padding: const EdgeInsets.all(16.0),
           child: chatList.isEmpty
-              ? Center(child: Text('데이터가 없습니다')) // 데이터가 없을 때 기본 메시지
+              ? Center(child: Text('데이터가 없습니다'))
               : ListView.builder(
-            itemCount: chatList.length, // 채팅 기록의 개수에 맞게 표시
+            itemCount: chatList.length,
             itemBuilder: (context, index) {
               final chatData = chatList[index];
               return GestureDetector(
@@ -72,9 +68,9 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0), // 카드 간 간격 설정
+                  padding: const EdgeInsets.only(bottom: 24.0),
                   child: Container(
-                    height: 120, // 카드 크기 설정
+                    height: 120,
                     decoration: BoxDecoration(
                       color: Colors.pink[50],
                       borderRadius: BorderRadius.circular(8),
@@ -83,7 +79,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                           color: Colors.black.withOpacity(0.15),
                           spreadRadius: 4,
                           blurRadius: 10,
-                          offset: Offset(0, 6), // 그림자 위치 조정
+                          offset: Offset(0, 6),
                         ),
                       ],
                     ),
@@ -97,12 +93,12 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  formatDate(chatData['created_at'] ?? ''), // 포맷된 날짜 표시
+                                  formatDate(chatData['created_at'] ?? ''),
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[700]),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  chatData['summary'] ?? '요약 없음', // 요약 표시
+                                  chatData['summary'] ?? '요약 없음',
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.pink[200]),
                                 ),
                               ],
@@ -119,11 +115,43 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ChatbotSummaryPage()),
+          );
+        },
+        label: Text('챗봇 요약 보고서'),
+        icon: Icon(Icons.description),
+        backgroundColor: Colors.pink[100],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonAnimator: _CustomFloatingActionButtonAnimator(),
     );
   }
 }
 
-// 개별 채팅 세부 페이지
+class _CustomFloatingActionButtonAnimator extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({Offset? begin, Offset? end, double? progress}) {
+    if (end != null) {
+      return Offset(end.dx, end.dy - 20); // 우측 하단에서 20픽셀 위로 이동
+    }
+    return begin ?? Offset.zero;
+  }
+
+  @override
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+    return parent;
+  }
+
+  @override
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+    return Tween<double>(begin: 0, end: 1).animate(parent);
+  }
+}
+
 class ChatDetailPage extends StatefulWidget {
   final int sessionId;
 
@@ -139,20 +167,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   @override
   void initState() {
     super.initState();
-    fetchChatDetailData(widget.sessionId); // 선택된 세션의 대화 데이터를 가져오기
+    fetchChatDetailData(widget.sessionId);
   }
 
-  // 선택된 세션의 상세 채팅 API 호출
   Future<void> fetchChatDetailData(int sessionId) async {
-    final url = Uri.parse('http://203.250.148.52:48003/api/chat/$sessionId'); // 실제 API URL
+    final url = Uri.parse('http://203.250.148.52:48003/api/chat/$sessionId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final data = json.decode(utf8.decode(response.bodyBytes));
-      print('API Chat Detail Data: $data'); // API 응답 데이터 출력
-
       setState(() {
-        // 세션의 "chats" 리스트를 저장
         chatDetailList = List<Map<String, dynamic>>.from(data['chats']);
       });
     } else {
@@ -170,10 +194,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       ),
       body: Center(
         child: Container(
-          width: 720, // 화면 너비 고정
+          width: 720,
           padding: const EdgeInsets.all(16.0),
           child: chatDetailList.isEmpty
-              ? Center(child: Text('대화 내역이 없습니다')) // 데이터가 없을 때 기본 메시지
+              ? Center(child: Text('대화 내역이 없습니다'))
               : ListView.builder(
             itemCount: chatDetailList.length,
             itemBuilder: (context, index) {
@@ -187,7 +211,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 
-  // 채팅 메시지 위젯
   Widget _buildChatMessage(String sender, String message, {required bool isUser}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -203,7 +226,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           if (!isUser) SizedBox(width: 8),
           Container(
             padding: EdgeInsets.all(10),
-            constraints: BoxConstraints(maxWidth: 400), // 메시지 최대 너비 제한을 400으로 줄임
+            constraints: BoxConstraints(maxWidth: 400),
             decoration: BoxDecoration(
               color: isUser ? Colors.pink[100] : Colors.grey[200],
               borderRadius: BorderRadius.circular(8),
@@ -211,8 +234,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             child: Text(
               message,
               style: TextStyle(fontSize: 14),
-              softWrap: true, // 자동 줄바꿈 활성화
-              overflow: TextOverflow.visible, // 오버플로우 시 내용이 화면 안에 유지됨
+              softWrap: true,
+              overflow: TextOverflow.visible,
             ),
           ),
           if (isUser) SizedBox(width: 8),
