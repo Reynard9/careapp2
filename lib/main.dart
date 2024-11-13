@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:careapp2/SensorDataPage/SensorDataPage.dart';
 import 'package:careapp2/ChatHistoryPage/ChatHistoryPage.dart';
+import 'dart:convert';
 import 'dart:math';
 
 void main() {
@@ -111,7 +113,58 @@ class _HomePageState extends State<HomePage> {
 }
 
 // 메인 페이지 내용 위젯
-class MainContent extends StatelessWidget {
+class MainContent extends StatefulWidget {
+  @override
+  _MainContentState createState() => _MainContentState();
+}
+
+class _MainContentState extends State<MainContent> {
+  int temperature = 0;
+  int humidity = 0;
+  String noiseLevel = '조용함';
+  String gasSensor = '유출없음';
+  List<Map<String, dynamic>> latestChat = []; // 최근 챗봇 이력 데이터 리스트
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSensorData();
+    fetchLatestChatData(); // 최근 챗봇 이력 데이터 가져오기
+  }
+
+  // 센서 데이터 API 호출 함수
+  Future<void> fetchSensorData() async {
+    final url = Uri.parse('http://203.250.148.52:48003/api/sensor');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      setState(() {
+        temperature = data[0]['data']['temperature']['in'];
+        humidity = data[0]['data']['humidty']['in'];
+        noiseLevel = data[0]['data']['sound'];
+        gasSensor = data[0]['data']['gas'];
+      });
+    } else {
+      print('Failed to fetch sensor data');
+    }
+  }
+
+  // 최근 챗봇 이력 API 호출 함수
+  Future<void> fetchLatestChatData() async {
+    final url = Uri.parse('http://203.250.148.52:48003/api/chat/latest');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      setState(() {
+        latestChat = List<Map<String, dynamic>>.from(data['chats']);
+      });
+    } else {
+      print('Failed to fetch latest chat data');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -130,8 +183,8 @@ class MainContent extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('어르신1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text('나이 n세', style: TextStyle(color: Colors.grey)),
+                  Text('김세종', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text('나이 80세', style: TextStyle(color: Colors.grey)),
                   Text('서울 광진구', style: TextStyle(color: Colors.grey)),
                 ],
               ),
@@ -161,17 +214,17 @@ class MainContent extends StatelessWidget {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _buildSensorCard('온도', '23°C')),
+                    Expanded(child: _buildSensorCard('온도', '$temperature°C')),
                     SizedBox(width: 10),
-                    Expanded(child: _buildSensorCard('가스 센서', '양호')),
+                    Expanded(child: _buildSensorCard('가스 센서', gasSensor)),
                   ],
                 ),
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _buildGaugeSensorCard('소음 정도', 40, 'dB')),
+                    Expanded(child: _buildGaugeSensorCard('소음 정도', noiseLevel == '조용함' ? 40 : 100, 'dB')),
                     SizedBox(width: 10),
-                    Expanded(child: _buildGaugeSensorCard('습도', 55, '%')),
+                    Expanded(child: _buildGaugeSensorCard('습도', humidity.toDouble(), '%')),
                   ],
                 ),
                 SizedBox(height: 10),
@@ -207,13 +260,18 @@ class MainContent extends StatelessWidget {
                 Text('최근 챗봇 이력', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 SizedBox(height: 10),
                 Expanded(
-                  child: ListView(
-                    children: [
-                      _buildChatMessage("어르신1", "오늘 날씨가 어떤가요?", isUser: true),
-                      _buildChatMessage("챗봇", "오늘 서울은 맑고 기온은 20도입니다.", isUser: false),
-                      _buildChatMessage("어르신1", "내일도 비슷한가요?", isUser: true),
-                      _buildChatMessage("챗봇", "네, 내일도 맑은 날씨가 예상됩니다.", isUser: false),
-                    ],
+                  child: latestChat.isEmpty
+                      ? Center(child: Text('최근 대화 내역이 없습니다')) // 데이터가 없을 때 기본 메시지
+                      : ListView.builder(
+                    itemCount: latestChat.length,
+                    itemBuilder: (context, index) {
+                      final chat = latestChat[index];
+                      return _buildChatMessage(
+                        chat['type'] == 'user' ? "김세종" : "챗봇",
+                        chat['content'],
+                        isUser: chat['type'] == 'user',
+                      );
+                    },
                   ),
                 ),
               ],
@@ -305,12 +363,19 @@ class MainContent extends StatelessWidget {
             ),
           if (!isUser) SizedBox(width: 8),
           Container(
+            constraints: BoxConstraints(maxWidth: 350), // 최대 너비를 350으로 설정
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isUser ? Colors.pink[100] : Colors.grey[200],
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(message, style: TextStyle(fontSize: 14)),
+            child: Text(
+              message,
+              style: TextStyle(fontSize: 14),
+              softWrap: true,           // 줄 바꿈을 활성화
+              maxLines: null,           // 줄 수 제한 없음
+              overflow: TextOverflow.clip,
+            ),
           ),
           if (isUser) SizedBox(width: 8),
           if (isUser)
@@ -334,20 +399,17 @@ class GaugeChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     double angle = value / 100 * 180;
 
-    // 배경 원호
     Paint backgroundArc = Paint()
       ..color = Colors.grey[300]!
       ..strokeWidth = 10
       ..style = PaintingStyle.stroke;
 
-    // 값 원호
     Paint valueArc = Paint()
       ..color = Colors.pink[200]!
       ..strokeWidth = 10
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    // 배경 원호 그리기
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,
@@ -356,7 +418,6 @@ class GaugeChartPainter extends CustomPainter {
       backgroundArc,
     );
 
-    // 값에 따른 원호 그리기
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,

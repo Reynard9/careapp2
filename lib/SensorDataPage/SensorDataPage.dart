@@ -1,10 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
+import 'dart:convert';
 import 'dart:math';
+import 'dart:async';
 
-// 센서 데이터 페이지 위젯
-class SensorDataPage extends StatelessWidget {
-  final PageController _pageController = PageController(); // PageView의 컨트롤러
+class SensorDataPage extends StatefulWidget {
+  @override
+  _SensorDataPageState createState() => _SensorDataPageState();
+}
+
+class _SensorDataPageState extends State<SensorDataPage> {
+  int temperature = 0;
+  int humidity = 0;
+  String noiseLevel = '조용함';
+  String gasSensor = '유출없음';
+  List<int> temperatureData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  List<int> humidityData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  Timer? _timer;
+
+  Future<void> fetchSensorData() async {
+    final url = Uri.parse('http://203.250.148.52:48003/api/sensor');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      print(data);
+
+      setState(() {
+        temperature = data[0]['data']['temperature']['in'];
+        humidity = data[0]['data']['humidty']['in'];
+        noiseLevel = data[0]['data']['sound'];
+        gasSensor = data[0]['data']['gas'];
+
+        if (temperatureData.length > 10) {
+          temperatureData.removeAt(0);
+          humidityData.removeAt(0);
+        }
+        temperatureData.add(temperature);
+        humidityData.add(humidity);
+      });
+    } else {
+      print('Failed to fetch data');
+    }
+  }
+
+  void _startPolling() {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      fetchSensorData();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSensorData();
+    _startPolling();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,20 +73,17 @@ class SensorDataPage extends StatelessWidget {
         elevation: 0,
       ),
       body: PageView(
-        controller: _pageController,
         children: [
-          // 첫 번째 페이지 - 온도와 습도 그래프
           Column(
             children: [
-              Expanded(child: _buildLineChartSection('온도', [100, 200, 150, 300, 250, 200])),
-              Expanded(child: _buildLineChartSection('습도', [50, 100, 75, 150, 125, 100])),
+              Expanded(child: _buildLineChartSection('온도', temperatureData, temperature, '°C')),
+              Expanded(child: _buildLineChartSection('습도', humidityData, humidity, '%')),
             ],
           ),
-          // 두 번째 페이지 - 소음 정도와 가스 센서 그래프
           Row(
             children: [
-              Expanded(child: _buildGaugeChartSection('소음 정도', 40, 'dB')),
-              Expanded(child: _buildGaugeChartSection('가스 센서', 300, 'ppm')), // '공기질'을 '가스 센서'로 변경
+              Expanded(child: _buildGaugeChartSection('소음 정도', noiseLevel, 'dB')),
+              Expanded(child: _buildGaugeChartSection('가스 센서', gasSensor, 'ppm')),
             ],
           ),
         ],
@@ -36,8 +91,7 @@ class SensorDataPage extends StatelessWidget {
     );
   }
 
-  // 라인 차트 섹션 생성
-  Widget _buildLineChartSection(String title, List<double> data) {
+  Widget _buildLineChartSection(String title, List<int> data, int value, String unit) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -56,7 +110,7 @@ class SensorDataPage extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                '${data.last.toInt()} ▲', // 현재 수치 표시 (마지막 값)
+                '$value$unit',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pink[200]),
               ),
               SizedBox(height: 16),
@@ -69,7 +123,7 @@ class SensorDataPage extends StatelessWidget {
                         spots: data
                             .asMap()
                             .entries
-                            .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
+                            .map((entry) => FlSpot(entry.key.toDouble(), entry.value.toDouble()))
                             .toList(),
                         isCurved: true,
                         gradient: LinearGradient(
@@ -83,17 +137,36 @@ class SensorDataPage extends StatelessWidget {
                             stops: [0.5, 1.0],
                           ),
                         ),
-                        dotData: FlDotData(
-                          show: true,
-                        ),
+                        dotData: FlDotData(show: true),
                       ),
                     ],
                     titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(showTitles: true),
+                      rightTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 50,
+                          getTitlesWidget: (value, meta) {
+                            if (value == data.last.toDouble()) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 5), // 오른쪽으로 5픽셀 이동
+                                child: Text(
+                                  '$value$unit',
+                                  style: TextStyle(color: Colors.pink[200], fontSize: 14),
+                                ),
+                              );
+                            }
+                            return Container();
+                          },
+                        ),
+                      ),
+                      topTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
                       ),
                       bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(showTitles: true),
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
                       ),
                     ),
                     gridData: FlGridData(show: true),
@@ -108,12 +181,11 @@ class SensorDataPage extends StatelessWidget {
     );
   }
 
-  // 게이지 차트 섹션 생성 - 소음 정도와 가스 센서 카드의 높이를 살짝 더 늘림
-  Widget _buildGaugeChartSection(String title, double value, String unit) {
+  Widget _buildGaugeChartSection(String title, String value, String unit) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
-        height: 255, // 카드 높이를 255로 설정하여 여백을 10픽셀 더 늘림
+        height: 255,
         child: Card(
           elevation: 2,
           shape: RoundedRectangleBorder(
@@ -123,7 +195,7 @@ class SensorDataPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, // 높이를 내용에 맞춰 최소화
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
@@ -131,8 +203,8 @@ class SensorDataPage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 CustomPaint(
-                  size: Size(140, 140), // 게이지 차트 크기를 140x140으로 유지
-                  painter: GaugeChartPainter(value),
+                  size: Size(140, 140),
+                  painter: GaugeChartPainter(value == '조용함' ? 40.0 : 100.0),
                 ),
                 SizedBox(height: 8),
                 Text(
@@ -148,38 +220,33 @@ class SensorDataPage extends StatelessWidget {
   }
 }
 
-// 게이지 차트를 그리는 CustomPainter 클래스
 class GaugeChartPainter extends CustomPainter {
   final double value;
   GaugeChartPainter(this.value);
 
   @override
   void paint(Canvas canvas, Size size) {
-    double angle = value / 100 * 180; // 값에 따라 각도를 설정 (0-100)
+    double angle = value / 100 * 180;
 
-    // 배경 원호
     Paint backgroundArc = Paint()
       ..color = Colors.grey[200]!
       ..strokeWidth = 15
       ..style = PaintingStyle.stroke;
 
-    // 값 원호
     Paint valueArc = Paint()
       ..color = Colors.pink[200]!
       ..strokeWidth = 15
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    // 원호 그리기
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,
-      pi, // 180도 (원호 반)
+      pi,
       false,
       backgroundArc,
     );
 
-    // 값에 따른 원호 그리기
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,
