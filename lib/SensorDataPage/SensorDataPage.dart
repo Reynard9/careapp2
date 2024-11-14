@@ -69,14 +69,26 @@ class _SensorDataPageState extends State<SensorDataPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '센서 데이터 현황',
-          style: TextStyle(
-            color: Colors.pink[200],
-            fontWeight: FontWeight.bold, // 글자 두께를 추가하여 더 두껍게 설정
-            fontSize: 25, // 필요한 경우 글자 크기 조정
-          ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.bar_chart, // 막대 그래프 아이콘
+              color: Colors.pink[200],
+              size: 28, // 아이콘 크기
+            ),
+            SizedBox(width: 8), // 텍스트와 아이콘 사이 간격
+            Text(
+              '센서 데이터 현황',
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                color: Colors.pink[200],
+                fontWeight: FontWeight.bold,
+                fontSize: 25,
+              ),
+            ),
+          ],
         ),
+
         backgroundColor: Colors.white,
         elevation: 0,
       ),

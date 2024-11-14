@@ -46,15 +46,26 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '챗봇 히스토리 확인',
-          style: TextStyle(
-            fontFamily: 'Pretendard',
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            color: Colors.pink[200],
-          ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.chat, // 채팅 아이콘
+              color: Colors.pink[200],
+              size: 28, // 아이콘 크기
+            ),
+            SizedBox(width: 8), // 아이콘과 텍스트 사이 간격
+            Text(
+              '챗봇 히스토리 확인',
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.pink[200],
+              ),
+            ),
+          ],
         ),
+
 
         backgroundColor: Colors.white,
         elevation: 0,
@@ -198,13 +209,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ChatbotSummaryPage()),
+            MaterialPageRoute(
+              builder: (context) => ChatbotSummaryPage(sessionId: widget.sessionId),
+            ),
           );
         },
         label: Text('챗봇 요약 보고서'),
         icon: Icon(Icons.description),
         backgroundColor: Colors.pink[100],
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButtonAnimator: _CustomFloatingActionButtonAnimator(),
     );

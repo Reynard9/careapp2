@@ -133,6 +133,7 @@ class MainContent extends StatefulWidget {
 class _MainContentState extends State<MainContent> {
   int temperature = 0;
   int humidity = 0;
+  int noise = 0;
   String noiseLevel = '조용함';
   String movementLevel = '활발'; // 움직임 정도 상태 변수
   List<Map<String, dynamic>> latestChat = []; // 최근 챗봇 이력 데이터 리스트
@@ -155,6 +156,7 @@ class _MainContentState extends State<MainContent> {
         temperature = data[0]['data']['temperature']['in'];
         humidity = data[0]['data']['humidty']['in'];
         noiseLevel = data[0]['data']['sound'];
+        noise = data[0]['data']['sound_in'];
         movementLevel = data[0]['data']['movement']; // 움직임 정도 데이터
       });
     } else {
@@ -234,7 +236,7 @@ class _MainContentState extends State<MainContent> {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _buildGaugeSensorCard('소음 정도', noiseLevel == '조용함' ? 40 : 100, 'dB')),
+                    Expanded(child: _buildGaugeSensorCard('소음 정도', noise.toDouble(), 'dB')),
                     SizedBox(width: 10),
                     Expanded(child: _buildGaugeSensorCard('습도', humidity.toDouble(), '%')),
                   ],
@@ -396,7 +398,6 @@ class _MainContentState extends State<MainContent> {
   }
 }
 
-// 게이지 차트를 그리는 CustomPainter 클래스
 class GaugeChartPainter extends CustomPainter {
   final double value;
   GaugeChartPainter(this.value);
@@ -405,8 +406,9 @@ class GaugeChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     double angle = value / 100 * 180;
 
+    // 채워지지 않은 부분을 연한 색으로 표시
     Paint backgroundArc = Paint()
-      ..color = Colors.grey[300]!
+      ..color = Colors.pink[100]!.withOpacity(0.2) // 연한 색상 추가
       ..strokeWidth = 10
       ..style = PaintingStyle.stroke;
 
@@ -416,6 +418,7 @@ class GaugeChartPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
+    // 전체 배경 아크(연한 색상)
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,
@@ -424,6 +427,7 @@ class GaugeChartPainter extends CustomPainter {
       backgroundArc,
     );
 
+    // 실제 값 아크(진한 색상)
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,
