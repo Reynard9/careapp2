@@ -50,11 +50,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/image/CareApp_Logo.jpeg',
-              width: 100, // 로고 크기 조정
-              height: 100,
-            ),
+            // Image.asset(
+            //   'assets/image/CareApp_Logo.jpeg',
+            //   width: 100, // 로고 크기 조정
+            //   height: 100,
+            // ),
             SizedBox(height: 20),
             Text(
               'CareApp',
