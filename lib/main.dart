@@ -13,6 +13,7 @@ class CareApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // 디버그 배너 제거
       title: 'CareApp',
       theme: ThemeData(
         primaryColor: Colors.pink[100],
@@ -45,14 +46,25 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Text(
-          'CareApp',
-          style: TextStyle(
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-            color: Colors.pink[200],
-            letterSpacing: 1.5,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/image/CareApp_Logo.jpeg',
+              width: 100, // 로고 크기 조정
+              height: 100,
+            ),
+            SizedBox(height: 20),
+            Text(
+              'CareApp',
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: Colors.pink[200],
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -88,9 +100,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'CareApp',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pink[200]),
+        title: Image.asset(
+          'assets/image/CareApp.jpeg',
+          height: 30, // 텍스트 높이에 맞추어 이미지 크기 조정
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -122,7 +134,7 @@ class _MainContentState extends State<MainContent> {
   int temperature = 0;
   int humidity = 0;
   String noiseLevel = '조용함';
-  String gasSensor = '유출없음';
+  String movementLevel = '활발'; // 움직임 정도 상태 변수
   List<Map<String, dynamic>> latestChat = []; // 최근 챗봇 이력 데이터 리스트
 
   @override
@@ -143,7 +155,7 @@ class _MainContentState extends State<MainContent> {
         temperature = data[0]['data']['temperature']['in'];
         humidity = data[0]['data']['humidty']['in'];
         noiseLevel = data[0]['data']['sound'];
-        gasSensor = data[0]['data']['gas'];
+        movementLevel = data[0]['data']['movement']; // 움직임 정도 데이터
       });
     } else {
       print('Failed to fetch sensor data');
@@ -177,7 +189,7 @@ class _MainContentState extends State<MainContent> {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                backgroundImage: AssetImage('assets/image/profile.png'),
               ),
               SizedBox(width: 10),
               Column(
@@ -216,7 +228,7 @@ class _MainContentState extends State<MainContent> {
                   children: [
                     Expanded(child: _buildSensorCard('온도', '$temperature°C')),
                     SizedBox(width: 10),
-                    Expanded(child: _buildSensorCard('가스 센서', gasSensor)),
+                    Expanded(child: _buildSensorCard('움직임 정도', movementLevel)), // 움직임 정도로 교체
                   ],
                 ),
                 SizedBox(height: 10),
@@ -227,12 +239,6 @@ class _MainContentState extends State<MainContent> {
                     Expanded(child: _buildGaugeSensorCard('습도', humidity.toDouble(), '%')),
                   ],
                 ),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(child: _buildSensorCard('움직임 정도', '활발')),
-                  ],
-                ),
               ],
             ),
           ),
@@ -241,7 +247,7 @@ class _MainContentState extends State<MainContent> {
           // 최근 챗봇 대화 내용 섹션
           Container(
             padding: EdgeInsets.all(16),
-            height: MediaQuery.of(context).size.height * 0.25,
+            height: MediaQuery.of(context).size.height * 0.35,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -282,7 +288,7 @@ class _MainContentState extends State<MainContent> {
     );
   }
 
-  // 일반 센서 카드 위젯 (온도, 가스 센서 등)
+  // 일반 센서 카드 위젯 (온도, 움직임 정도 등)
   Widget _buildSensorCard(String title, String data) {
     return Container(
       padding: EdgeInsets.all(16),

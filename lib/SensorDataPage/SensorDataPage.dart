@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:async';
 
 class SensorDataPage extends StatefulWidget {
@@ -13,10 +12,10 @@ class SensorDataPage extends StatefulWidget {
 class _SensorDataPageState extends State<SensorDataPage> {
   int temperature = 0;
   int humidity = 0;
-  String noiseLevel = '조용함';
-  String gasSensor = '유출없음';
+  int soundIn = 0; // 소음 dB 값을 위한 변수
   List<int> temperatureData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   List<int> humidityData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  List<int> soundData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // 소음 데이터 리스트
   Timer? _timer;
 
   Future<void> fetchSensorData() async {
@@ -30,15 +29,17 @@ class _SensorDataPageState extends State<SensorDataPage> {
       setState(() {
         temperature = data[0]['data']['temperature']['in'];
         humidity = data[0]['data']['humidty']['in'];
-        noiseLevel = data[0]['data']['sound'];
-        gasSensor = data[0]['data']['gas'];
+        soundIn = data[0]['data']['sound_in']; // 소음 dB 값
 
+        // 데이터 업데이트
         if (temperatureData.length > 10) {
           temperatureData.removeAt(0);
           humidityData.removeAt(0);
+          soundData.removeAt(0);
         }
         temperatureData.add(temperature);
         humidityData.add(humidity);
+        soundData.add(soundIn);
       });
     } else {
       print('Failed to fetch data');
@@ -68,28 +69,27 @@ class _SensorDataPageState extends State<SensorDataPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('센서 데이터 현황', style: TextStyle(color: Colors.pink[200])),
+        title: Text(
+          '센서 데이터 현황',
+          style: TextStyle(
+            color: Colors.pink[200],
+            fontWeight: FontWeight.bold, // 글자 두께를 추가하여 더 두껍게 설정
+            fontSize: 25, // 필요한 경우 글자 크기 조정
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 첫 번째 줄 - 소음 정도와 가스 센서
-            Row(
-              children: [
-                Expanded(child: _buildGaugeChartSection('소음 정도', noiseLevel)),
-                SizedBox(width: 8),
-                Expanded(child: _buildGaugeChartSection('가스 센서', gasSensor)),
-              ],
-            ),
-            SizedBox(height: 16),
-            // 두 번째 줄 - 온도 (세로 배치)
             _buildLineChartSection('온도', temperatureData, temperature, '°C'),
             SizedBox(height: 8),
-            // 세 번째 줄 - 습도 (세로 배치)
             _buildLineChartSection('습도', humidityData, humidity, '%'),
+            SizedBox(height: 8),
+            _buildLineChartSection('소음 정도', soundData, soundIn, 'dB'), // 소음 정도 그래프 추가
           ],
         ),
       ),
@@ -115,7 +115,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
               ),
               SizedBox(height: 8),
               Text(
-                '$value$unit',
+                '$value $unit',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pink[200]),
               ),
               SizedBox(height: 16),
@@ -155,7 +155,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 5),
                                 child: Text(
-                                  '$value$unit',
+                                  '$value $unit',
                                   style: TextStyle(color: Colors.pink[200], fontSize: 14),
                                 ),
                               );
@@ -184,85 +184,5 @@ class _SensorDataPageState extends State<SensorDataPage> {
         ),
       ),
     );
-  }
-
-  Widget _buildGaugeChartSection(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        height: 255,
-        child: Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                CustomPaint(
-                  size: Size(140, 140),
-                  painter: GaugeChartPainter(value == '조용함' ? 40.0 : 100.0),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.pink[200]),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class GaugeChartPainter extends CustomPainter {
-  final double value;
-  GaugeChartPainter(this.value);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double angle = value / 100 * 180;
-
-    Paint backgroundArc = Paint()
-      ..color = Colors.grey[200]!
-      ..strokeWidth = 15
-      ..style = PaintingStyle.stroke;
-
-    Paint valueArc = Paint()
-      ..color = Colors.pink[200]!
-      ..strokeWidth = 15
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
-      pi,
-      pi,
-      false,
-      backgroundArc,
-    );
-
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
-      pi,
-      angle * pi / 180,
-      false,
-      valueArc,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }

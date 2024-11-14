@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:careapp2/ChatSummaryPage/ChatSummaryPage.dart';
+import 'package:google_fonts/google_fonts.dart' as google_fonts; // google_fonts에 별칭 추가
+
 
 class ChatHistoryPage extends StatefulWidget {
   @override
@@ -44,7 +46,16 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat History', style: TextStyle(color: Colors.pink[200])),
+        title: Text(
+          '챗봇 히스토리 확인',
+          style: TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: Colors.pink[200],
+          ),
+        ),
+
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -94,17 +105,24 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                               children: [
                                 Text(
                                   formatDate(chatData['created_at'] ?? ''),
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[700]),
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[700]),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
                                   chatData['summary'] ?? '요약 없음',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.pink[200]),
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.pink[200]),
                                 ),
                               ],
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                          Icon(Icons.arrow_forward_ios,
+                              size: 16, color: Colors.grey[400]),
                         ],
                       ),
                     ),
@@ -115,40 +133,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ChatbotSummaryPage()),
-          );
-        },
-        label: Text('챗봇 요약 보고서'),
-        icon: Icon(Icons.description),
-        backgroundColor: Colors.pink[100],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButtonAnimator: _CustomFloatingActionButtonAnimator(),
     );
-  }
-}
-
-class _CustomFloatingActionButtonAnimator extends FloatingActionButtonAnimator {
-  @override
-  Offset getOffset({Offset? begin, Offset? end, double? progress}) {
-    if (end != null) {
-      return Offset(end.dx, end.dy - 20); // 우측 하단에서 20픽셀 위로 이동
-    }
-    return begin ?? Offset.zero;
-  }
-
-  @override
-  Animation<double> getScaleAnimation({required Animation<double> parent}) {
-    return parent;
-  }
-
-  @override
-  Animation<double> getRotationAnimation({required Animation<double> parent}) {
-    return Tween<double>(begin: 0, end: 1).animate(parent);
   }
 }
 
@@ -203,11 +188,25 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             itemBuilder: (context, index) {
               final chat = chatDetailList[index];
               final isUser = chat['type'] == 'user';
-              return _buildChatMessage(isUser ? "어르신1" : "챗봇", chat['content'] ?? '', isUser: isUser);
+              return _buildChatMessage(
+                  isUser ? "어르신1" : "챗봇", chat['content'] ?? '', isUser: isUser);
             },
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ChatbotSummaryPage()),
+          );
+        },
+        label: Text('챗봇 요약 보고서'),
+        icon: Icon(Icons.description),
+        backgroundColor: Colors.pink[100],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonAnimator: _CustomFloatingActionButtonAnimator(),
     );
   }
 
@@ -248,5 +247,26 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         ],
       ),
     );
+  }
+}
+
+// Custom Floating Action Button Animator
+class _CustomFloatingActionButtonAnimator extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({Offset? begin, Offset? end, double? progress}) {
+    if (end != null) {
+      return Offset(end.dx, end.dy - 20); // 우측 하단에서 20픽셀 위로 이동
+    }
+    return begin ?? Offset.zero;
+  }
+
+  @override
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+    return parent;
+  }
+
+  @override
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+    return Tween<double>(begin: 0, end: 1).animate(parent);
   }
 }
