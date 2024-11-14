@@ -83,7 +83,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
                 fontFamily: 'Pretendard',
                 color: Colors.pink[200],
                 fontWeight: FontWeight.bold,
-                fontSize: 25,
+                fontSize: 22,
               ),
             ),
           ],
@@ -121,14 +121,17 @@ class _SensorDataPageState extends State<SensorDataPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '$value $unit',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pink[200]),
+              Row(
+                children: [
+                  Text(
+                    '$title ',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '$value $unit',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.pink[200]),
+                  ),
+                ],
               ),
               SizedBox(height: 16),
               SizedBox(

@@ -239,7 +239,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           if (!isUser) SizedBox(width: 8),
           Container(
             padding: EdgeInsets.all(10),
-            constraints: BoxConstraints(maxWidth: 400),
+            constraints: BoxConstraints(maxWidth: 300),
             decoration: BoxDecoration(
               color: isUser ? Colors.pink[100] : Colors.grey[200],
               borderRadius: BorderRadius.circular(8),

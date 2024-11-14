@@ -4,6 +4,7 @@ import 'package:careapp2/SensorDataPage/SensorDataPage.dart';
 import 'package:careapp2/ChatHistoryPage/ChatHistoryPage.dart';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:async';
 
 void main() {
   runApp(CareApp());
@@ -137,12 +138,26 @@ class _MainContentState extends State<MainContent> {
   String noiseLevel = '조용함';
   String movementLevel = '활발'; // 움직임 정도 상태 변수
   List<Map<String, dynamic>> latestChat = []; // 최근 챗봇 이력 데이터 리스트
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     fetchSensorData();
     fetchLatestChatData(); // 최근 챗봇 이력 데이터 가져오기
+    _startPolling();
+  }
+
+  void _startPolling() { // 주기적으로 센서 데이터를 가져오는 타이머 설정
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      fetchSensorData();
+    });
+  }
+
+  @override // 타이머 정리
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   // 센서 데이터 API 호출 함수
@@ -236,9 +251,9 @@ class _MainContentState extends State<MainContent> {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _buildGaugeSensorCard('소음 정도', noise.toDouble(), 'dB')),
+                    Expanded(child: _buildGaugeSensorCard('소음 정도', noise.toDouble(), 'dB', 55)),
                     SizedBox(width: 10),
-                    Expanded(child: _buildGaugeSensorCard('습도', humidity.toDouble(), '%')),
+                    Expanded(child: _buildGaugeSensorCard('습도', humidity.toDouble(), '%', 55)),
                   ],
                 ),
               ],
@@ -246,10 +261,10 @@ class _MainContentState extends State<MainContent> {
           ),
           SizedBox(height: 20),
 
-          // 최근 챗봇 대화 내용 섹션
+          // 최근 챗봇 대화 내용 섹션 (높이를 90픽셀 줄임)
           Container(
             padding: EdgeInsets.all(16),
-            height: MediaQuery.of(context).size.height * 0.35,
+            height: MediaQuery.of(context).size.height * 0.25,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -318,10 +333,10 @@ class _MainContentState extends State<MainContent> {
   }
 
   // 게이지 차트가 포함된 센서 카드 위젯 (습도, 소음 정도)
-  Widget _buildGaugeSensorCard(String title, double value, String unit) {
+  Widget _buildGaugeSensorCard(String title, double value, String unit, double size) {
     return Container(
       padding: EdgeInsets.all(16),
-      height: 160,
+      height: 150,  // 높이를 조금 줄임
       decoration: BoxDecoration(
         color: Colors.pink[50],
         borderRadius: BorderRadius.circular(10),
@@ -340,8 +355,8 @@ class _MainContentState extends State<MainContent> {
           Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
           SizedBox(height: 8),
           SizedBox(
-            height: 60,
-            width: 60,
+            height: size,
+            width: size,
             child: CustomPaint(
               painter: GaugeChartPainter(value),
             ),
@@ -371,7 +386,7 @@ class _MainContentState extends State<MainContent> {
             ),
           if (!isUser) SizedBox(width: 8),
           Container(
-            constraints: BoxConstraints(maxWidth: 350), // 최대 너비를 350으로 설정
+            constraints: BoxConstraints(maxWidth: 270), // 최대 너비를 270으로 설정
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isUser ? Colors.pink[100] : Colors.grey[200],
@@ -381,7 +396,6 @@ class _MainContentState extends State<MainContent> {
               message,
               style: TextStyle(fontSize: 14),
               softWrap: true,           // 줄 바꿈을 활성화
-              maxLines: null,           // 줄 수 제한 없음
               overflow: TextOverflow.clip,
             ),
           ),
