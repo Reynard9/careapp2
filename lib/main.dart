@@ -50,11 +50,6 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Image.asset(
-            //   'assets/image/CareApp_Logo.jpeg',
-            //   width: 100, // 로고 크기 조정
-            //   height: 100,
-            // ),
             SizedBox(height: 20),
             Text(
               'CareApp',
@@ -103,7 +98,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Image.asset(
           'assets/image/CareApp.jpeg',
-          height: 30, // 텍스트 높이에 맞추어 이미지 크기 조정
+          height: 30,
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -125,7 +120,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// 메인 페이지 내용 위젯
 class MainContent extends StatefulWidget {
   @override
   _MainContentState createState() => _MainContentState();
@@ -135,32 +129,33 @@ class _MainContentState extends State<MainContent> {
   int temperature = 0;
   int humidity = 0;
   int noise = 0;
+  int emergencyCnt = 0;
   String noiseLevel = '조용함';
-  String movementLevel = '활발'; // 움직임 정도 상태 변수
-  List<Map<String, dynamic>> latestChat = []; // 최근 챗봇 이력 데이터 리스트
+  String movementLevel = '활발';
+  List<Map<String, dynamic>> latestChat = [];
   Timer? _timer;
+  bool isEmergency = false; // 응급상황 여부
 
   @override
   void initState() {
     super.initState();
     fetchSensorData();
-    fetchLatestChatData(); // 최근 챗봇 이력 데이터 가져오기
+    fetchLatestChatData();
     _startPolling();
   }
 
-  void _startPolling() { // 주기적으로 센서 데이터를 가져오는 타이머 설정
+  void _startPolling() {
     _timer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchSensorData();
     });
   }
 
-  @override // 타이머 정리
+  @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
 
-  // 센서 데이터 API 호출 함수
   Future<void> fetchSensorData() async {
     final url = Uri.parse('http://203.250.148.52:48003/api/sensor');
     final response = await http.get(url);
@@ -169,17 +164,23 @@ class _MainContentState extends State<MainContent> {
       final data = json.decode(utf8.decode(response.bodyBytes));
       setState(() {
         temperature = data[0]['data']['temperature']['in'];
+        if (temperature >= 50) {
+          emergencyCnt = emergencyCnt + 1;
+        }
+        if (emergencyCnt >= 5 && !isEmergency) {
+          isEmergency = true;
+          emergencyCnt = 0 ;
+        }
         humidity = data[0]['data']['humidty']['in'];
         noiseLevel = data[0]['data']['sound'];
         noise = data[0]['data']['sound_in'];
-        movementLevel = data[0]['data']['movement']; // 움직임 정도 데이터
+        movementLevel = data[0]['data']['movement'];
       });
     } else {
       print('Failed to fetch sensor data');
     }
   }
 
-  // 최근 챗봇 이력 API 호출 함수
   Future<void> fetchLatestChatData() async {
     final url = Uri.parse('http://203.250.148.52:48003/api/chat/latest');
     final response = await http.get(url);
@@ -198,107 +199,154 @@ class _MainContentState extends State<MainContent> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 프로필 정보 표시 섹션
-          Row(
+      child:
+          Stack(
             children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: AssetImage('assets/image/profile.png'),
-              ),
-              SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('김세종', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text('나이 80세', style: TextStyle(color: Colors.grey)),
-                  Text('서울 광진구', style: TextStyle(color: Colors.grey)),
+
+                  // 프로필 정보 표시 섹션
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: AssetImage('assets/image/profile.png'),
+                      ),
+                      SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('김세종', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text('나이 80세', style: TextStyle(color: Colors.grey)),
+                          Text('서울 광진구', style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+
+                  // 센서 데이터 확인 섹션
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 2,
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('센서 데이터 확인', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(child: _buildSensorCard('온도', '$temperature°C')),
+                            SizedBox(width: 10),
+                            Expanded(child: _buildSensorCard('움직임 정도', movementLevel)),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(child: _buildGaugeSensorCard('소음 정도', noise.toDouble(), 'dB', 55)),
+                            SizedBox(width: 10),
+                            Expanded(child: _buildGaugeSensorCard('습도', humidity.toDouble(), '%', 55)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+
+                  // 최근 챗봇 대화 내용 섹션
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 2,
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('최근 챗봇 이력', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 10),
+                        Expanded(
+                          child: latestChat.isEmpty
+                              ? Center(child: Text('최근 대화 내역이 없습니다'))
+                              : ListView.builder(
+                            itemCount: latestChat.length,
+                            itemBuilder: (context, index) {
+                              final chat = latestChat[index];
+                              return _buildChatMessage(
+                                chat['type'] == 'user' ? "김세종" : "챗봇",
+                                chat['content'],
+                                isUser: chat['type'] == 'user',
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
+              if (isEmergency) _buildEmergencyBanner(),
             ],
-          ),
-          SizedBox(height: 20),
+          )
 
-          // 센서 데이터 확인 섹션
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
+    );
+  }
+
+  // 응급상황 배너 위젯
+  Widget _buildEmergencyBanner() {
+    // 7초 후 자동으로 배너를 닫기 위한 타이머 설정
+    Future.delayed(Duration(seconds: 7), () {
+      if (mounted) {
+        setState(() {
+          isEmergency = false; // 7초 후 응급상황 배너를 자동으로 닫음
+        });
+      }
+    });
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      color: Colors.redAccent,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '응급상황! 온도가 50도를 초과했습니다!',
+            style: TextStyle(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 10,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('센서 데이터 확인', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(child: _buildSensorCard('온도', '$temperature°C')),
-                    SizedBox(width: 10),
-                    Expanded(child: _buildSensorCard('움직임 정도', movementLevel)), // 움직임 정도로 교체
-                  ],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(child: _buildGaugeSensorCard('소음 정도', noise.toDouble(), 'dB', 55)),
-                    SizedBox(width: 10),
-                    Expanded(child: _buildGaugeSensorCard('습도', humidity.toDouble(), '%', 55)),
-                  ],
-                ),
-              ],
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 20),
-
-          // 최근 챗봇 대화 내용 섹션 (높이를 90픽셀 줄임)
-          Container(
-            padding: EdgeInsets.all(16),
-            height: MediaQuery.of(context).size.height * 0.25,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 10,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('최근 챗봇 이력', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
-                Expanded(
-                  child: latestChat.isEmpty
-                      ? Center(child: Text('최근 대화 내역이 없습니다')) // 데이터가 없을 때 기본 메시지
-                      : ListView.builder(
-                    itemCount: latestChat.length,
-                    itemBuilder: (context, index) {
-                      final chat = latestChat[index];
-                      return _buildChatMessage(
-                        chat['type'] == 'user' ? "김세종" : "챗봇",
-                        chat['content'],
-                        isUser: chat['type'] == 'user',
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+          IconButton(
+            icon: Icon(Icons.close, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                isEmergency = false; // 사용자가 배너를 닫으면 응급상황 해제
+              });
+            },
           ),
         ],
       ),
@@ -336,7 +384,7 @@ class _MainContentState extends State<MainContent> {
   Widget _buildGaugeSensorCard(String title, double value, String unit, double size) {
     return Container(
       padding: EdgeInsets.all(16),
-      height: 150,  // 높이를 조금 줄임
+      height: 150,
       decoration: BoxDecoration(
         color: Colors.pink[50],
         borderRadius: BorderRadius.circular(10),
@@ -386,7 +434,7 @@ class _MainContentState extends State<MainContent> {
             ),
           if (!isUser) SizedBox(width: 8),
           Container(
-            constraints: BoxConstraints(maxWidth: 270), // 최대 너비를 270으로 설정
+            constraints: BoxConstraints(maxWidth: 270),
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isUser ? Colors.pink[100] : Colors.grey[200],
@@ -395,7 +443,7 @@ class _MainContentState extends State<MainContent> {
             child: Text(
               message,
               style: TextStyle(fontSize: 14),
-              softWrap: true,           // 줄 바꿈을 활성화
+              softWrap: true,
               overflow: TextOverflow.clip,
             ),
           ),
@@ -420,9 +468,8 @@ class GaugeChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     double angle = value / 100 * 180;
 
-    // 채워지지 않은 부분을 연한 색으로 표시
     Paint backgroundArc = Paint()
-      ..color = Colors.pink[100]!.withOpacity(0.2) // 연한 색상 추가
+      ..color = Colors.pink[100]!.withOpacity(0.2)
       ..strokeWidth = 10
       ..style = PaintingStyle.stroke;
 
@@ -432,7 +479,6 @@ class GaugeChartPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    // 전체 배경 아크(연한 색상)
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,
@@ -441,7 +487,6 @@ class GaugeChartPainter extends CustomPainter {
       backgroundArc,
     );
 
-    // 실제 값 아크(진한 색상)
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
       pi,

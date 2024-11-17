@@ -5,6 +5,14 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+dependencies {
+    // Import the Firebase BoM
+
+
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
+}
+
 android {
     namespace = "com.example.careapp2"
     compileSdk = flutter.compileSdkVersion

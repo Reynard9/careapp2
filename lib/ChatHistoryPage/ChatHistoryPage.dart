@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:careapp2/ChatSummaryPage/ChatSummaryPage.dart';
-import 'package:google_fonts/google_fonts.dart' as google_fonts; // google_fonts에 별칭 추가
-
 
 class ChatHistoryPage extends StatefulWidget {
   @override
@@ -65,8 +63,6 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             ),
           ],
         ),
-
-
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -98,10 +94,10 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          spreadRadius: 4,
-                          blurRadius: 10,
-                          offset: Offset(0, 6),
+                          color: Colors.black.withOpacity(0.1), // 그림자 색상
+                          spreadRadius: 0,  // 퍼지는 범위 줄이기
+                          blurRadius: 6,    // 흐림 정도 줄이기
+                          offset: Offset(0, 2),  // 위치 약간 아래로
                         ),
                       ],
                     ),
