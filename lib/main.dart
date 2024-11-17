@@ -164,7 +164,7 @@ class _MainContentState extends State<MainContent> {
       final data = json.decode(utf8.decode(response.bodyBytes));
       setState(() {
         temperature = data[0]['data']['temperature']['in'];
-        if (temperature >= 50) {
+        if (temperature >= 40) {
           emergencyCnt = emergencyCnt + 1;
         }
         if (emergencyCnt >= 5 && !isEmergency) {
@@ -333,7 +333,7 @@ class _MainContentState extends State<MainContent> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '응급상황! 온도가 50도를 초과했습니다!',
+            '응급상황! 온도가 40도를 초과했습니다!',
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
