@@ -41,3 +41,96 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# iOS related
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
+
+# macOS
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral
+
+# Coverage
+coverage/
+
+# Environment files
+.env
+.env.*
+*.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+firebase-debug.log
+firebase-debug.*.log
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# API Keys and Secrets
+**/config/secrets.json
+**/config/credentials.json
+**/config/api_keys.json
+**/config/*.pem
+**/config/*.key
+**/config/*.crt
+**/config/*.p12
+**/config/*.keystore
+**/config/*.jks
+
+# OAuth and Authentication
+**/config/oauth.json
+**/config/auth.json
+**/config/tokens.json
+**/config/credentials/
+**/config/secrets/
+
+# Other sensitive files
+**/config/*.secret
+**/config/*.private
+**/config/*.confidential
+**/config/*.secure
+**/config/*.sensitive
