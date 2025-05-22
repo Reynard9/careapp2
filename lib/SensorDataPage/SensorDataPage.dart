@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SensorDataPage extends StatefulWidget {
   @override
@@ -19,7 +20,7 @@ class _SensorDataPageState extends State<SensorDataPage> {
   Timer? _timer;
 
   Future<void> fetchSensorData() async {
-    final url = Uri.parse('http://203.250.148.52:48003/api/sensor');
+    final url = Uri.parse(dotenv.env['API_SENSOR_URL']!);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

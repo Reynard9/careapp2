@@ -5,8 +5,11 @@ import 'package:careapp2/ChatHistoryPage/ChatHistoryPage.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:async';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   runApp(CareApp());
 }
 
@@ -157,7 +160,7 @@ class _MainContentState extends State<MainContent> {
   }
 
   Future<void> fetchSensorData() async {
-    final url = Uri.parse('http://203.250.148.52:48003/api/sensor');
+    final url = Uri.parse(dotenv.env['API_SENSOR_URL']!);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -182,7 +185,7 @@ class _MainContentState extends State<MainContent> {
   }
 
   Future<void> fetchLatestChatData() async {
-    final url = Uri.parse('http://203.250.148.52:48003/api/chat/latest');
+    final url = Uri.parse(dotenv.env['API_CHAT_LATEST_URL']!);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:careapp2/ChatSummaryPage/ChatSummaryPage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatHistoryPage extends StatefulWidget {
   @override
@@ -18,7 +19,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
   }
 
   Future<void> fetchChatHistData() async {
-    final url = Uri.parse('http://203.250.148.52:48003/api/chat/list');
+    final url = Uri.parse(dotenv.env['API_CHAT_LIST_URL']!);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
